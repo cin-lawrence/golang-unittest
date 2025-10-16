@@ -1,9 +1,9 @@
 package bank_test
 
 import (
-	"testing"
 	"golang-unittest/ch20/assert"
 	"golang-unittest/ch20/bank"
+	"testing"
 )
 
 func TestBadBank(t *testing.T) {
