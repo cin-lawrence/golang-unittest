@@ -1,4 +1,4 @@
-package main
+package util
 
 func Find[A any](items []A, predicate func(A) bool) (value A, found bool) {
 	for _, item := range items {

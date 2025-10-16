@@ -1,4 +1,8 @@
-package main
+package bank
+
+import (
+	"golang-unittest/ch20/util"
+)
 
 type Transaction struct {
 	From string
@@ -31,7 +35,7 @@ func applyTransaction(account *Account, transaction Transaction) *Account {
 }
 
 func NewBalanceFor(account *Account, transactions []Transaction) *Account {
-	return Reduce(
+	return util.Reduce(
 		transactions,
 		applyTransaction,
 		account,

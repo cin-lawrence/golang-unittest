@@ -1,16 +1,20 @@
-package main
+package sum_test
 
 import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"golang-unittest/ch20/assert"
+	"golang-unittest/ch20/sum"
+	"golang-unittest/ch20/util"
 )
 
 func TestSum(t *testing.T) {
 	t.Run("collections of any size", func(t *testing.T) {
 		numbers := []int{1, 2, 3}
 
-		got := Sum(numbers)
+		got := sum.Sum(numbers)
 		want := 6
 
 		if got != want {
@@ -27,13 +31,13 @@ func TestSumAllTails(t *testing.T) {
 	}
 
 	t.Run("make the sums of tails of", func(t *testing.T) {
-		got := SumAllTails([]int{1, 2}, []int{0, 9})
+		got := sum.SumAllTails([]int{1, 2}, []int{0, 9})
 		want := []int{2, 9}
 		checkSums(t, got, want)
 	})
 
 	t.Run("safely sum empty slices", func(t *testing.T) {
-		got := SumAllTails([]int{}, []int{3, 4, 5})
+		got := sum.SumAllTails([]int{}, []int{3, 4, 5})
 		want := []int{0, 9}
 		checkSums(t, got, want)
 	})
@@ -45,7 +49,7 @@ func TestReduce(t *testing.T) {
 			return x * y
 		}
 
-		AssertEqual(t, Reduce([]int{1, 2, 3}, multiply, 1), 6)
+		assert.AssertEqual(t, util.Reduce([]int{1, 2, 3}, multiply, 1), 6)
 	})
 
 	t.Run("concatenate strings", func(t *testing.T) {
@@ -53,7 +57,7 @@ func TestReduce(t *testing.T) {
 			return x + y
 		}
 
-		AssertEqual(t, Reduce([]string{"a", "b", "c"}, concatenate, ""), "abc")
+		assert.AssertEqual(t, util.Reduce([]string{"a", "b", "c"}, concatenate, ""), "abc")
 	})
 }
 
@@ -61,12 +65,12 @@ func TestFind(t *testing.T) {
 	t.Run("find first even number", func(t *testing.T) {
 		numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-		firstEvenNumber, found := Find(numbers, func(x int) bool {
+		firstEvenNumber, found := util.Find(numbers, func(x int) bool {
 			return x%2 == 0
 		})
 
-		AssertTrue(t, found)
-		AssertEqual(t, firstEvenNumber, 2)
+		assert.AssertTrue(t, found)
+		assert.AssertEqual(t, firstEvenNumber, 2)
 	})
 
 	type Person struct {
@@ -80,11 +84,11 @@ func TestFind(t *testing.T) {
 			Person{Name: "Chris James"},
 		}
 
-		king, found := Find(people, func(p Person) bool {
+		king, found := util.Find(people, func(p Person) bool {
 			return strings.Contains(p.Name, "Chris")
 		})
 
-		AssertTrue(t, found)
-		AssertEqual(t, king, Person{Name: "Chris James"})
+		assert.AssertTrue(t, found)
+		assert.AssertEqual(t, king, Person{Name: "Chris James"})
 	})
 }
