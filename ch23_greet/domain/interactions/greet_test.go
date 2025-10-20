@@ -3,9 +3,9 @@ package interactions_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert/v2"
 	"ch23/greet/domain/interactions"
 	"ch23/greet/specs"
+	"github.com/alecthomas/assert/v2"
 )
 
 func TestGreet(t *testing.T) {
