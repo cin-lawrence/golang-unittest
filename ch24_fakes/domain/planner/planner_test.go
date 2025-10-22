@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"ch24/fakes/adapters/inmemory"
+	"ch24/fakes/adapters/sqlaite"
 	"ch24/fakes/domain/ingredient"
 	"ch24/fakes/domain/planner"
 	"ch24/fakes/internal/expect"
@@ -20,6 +21,21 @@ func TestRecipePlanner(t *testing.T) {
 				return inmemory.NewRecipeStore(), inmemory.NewPantry(), func() {}
 			},
 		}).Test(t)
+	})
+
+	t.Run("with sqlite", func(t *testing.T) {
+		if !testing.Short() {
+			(&RecipePlannerTest{
+				CreateDependencies: func() (planner.RecipeBook, planner.Pantry, Cleanup) {
+					client := sqlaite.NewSQLiteClient()
+					return sqlaite.NewRecipeStore(client), sqlaite.NewPantry(client), func() {
+						if err := client.Close(); err != nil {
+							t.Error(err)
+						}
+					}
+				},
+			}).Test(t)
+		}
 	})
 }
 
