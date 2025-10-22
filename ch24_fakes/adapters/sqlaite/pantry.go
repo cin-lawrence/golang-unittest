@@ -4,6 +4,7 @@ import (
 	"context"
 
 	ent2 "ch24/fakes/adapters/sqlaite/ent"
+	_ "github.com/mattn/go-sqlite3"
 
 	entingr "ch24/fakes/adapters/sqlaite/ent/ingredient"
 	"ch24/fakes/adapters/sqlaite/ent/pantry"

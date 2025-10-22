@@ -2,7 +2,10 @@ module ch24/fakes
 
 go 1.24.4
 
-require github.com/google/uuid v1.6.0
+require (
+	github.com/google/uuid v1.6.0
+	github.com/mattn/go-sqlite3 v1.14.17
+)
 
 require (
 	ariga.io/atlas v0.32.1-0.20250325101103-175b25e1c1b9 // indirect
