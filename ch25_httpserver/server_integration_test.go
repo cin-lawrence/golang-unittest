@@ -1,6 +1,7 @@
-package poker
+package poker_test
 
 import (
+	poker "ch25/httpserver"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,8 +10,8 @@ import (
 func TestRecordWinsAndRetrievingThem(t *testing.T) {
 	database, cleanDatabase := createTempFile(t, `[]`)
 	defer cleanDatabase()
-	store, _ := NewFileSystemPlayerStore(database)
-	server := mustMakePlayerServer(t, store)
+	store, _ := poker.NewFileSystemPlayerStore(database)
+	server := mustMakePlayerServer(t, store, dummyGame)
 	player := "Pepper"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -31,7 +32,7 @@ func TestRecordWinsAndRetrievingThem(t *testing.T) {
 		assertStatus(t, response.Code, http.StatusOK)
 
 		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
+		want := []poker.Player{
 			{"Pepper", 3},
 		}
 		assertLeague(t, got, want)

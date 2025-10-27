@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 )
 
 var dummyBlindAlerter = &poker.SpyBlindAlerter{}
@@ -18,13 +19,17 @@ type GameSpy struct {
 	FinishCalled bool
 	StartedWith  int
 	FinishedWith string
+	BlindAlert   []byte
 }
 
-func (g *GameSpy) Start(numberOfPlayers int) {
+func (g *GameSpy) Start(numberOfPlayers int, out io.Writer) {
+	g.StartCalled = true
 	g.StartedWith = numberOfPlayers
+	out.Write(g.BlindAlert)
 }
 
 func (g *GameSpy) Finish(winner string) {
+	g.FinishCalled = true
 	g.FinishedWith = winner
 }
 
@@ -106,9 +111,22 @@ func assertGameStartedWith(t testing.TB, game *GameSpy, numberOfPlayersWanted in
 
 func assertGameFinishedWith(t testing.TB, game *GameSpy, winner string) {
 	t.Helper()
-	if game.FinishedWith != winner {
+	passed := retryUntil(500*time.Millisecond, func() bool {
+		return game.FinishedWith == winner
+	})
+	if !passed {
 		t.Errorf("expected finish called with %q but got %q", winner, game.FinishedWith)
 	}
+}
+
+func retryUntil(d time.Duration, f func() bool) bool {
+	deadline := time.Now().Add(d)
+	for time.Now().Before(deadline) {
+		if f() {
+			return true
+		}
+	}
+	return false
 }
 
 func assertGameNotStarted(t testing.TB, game *GameSpy) {

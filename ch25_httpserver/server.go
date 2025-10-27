@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"text/template"
-
-	"github.com/gorilla/websocket"
 )
 
 const jsonContentType = "application/json"
@@ -21,12 +20,13 @@ type PlayerStore interface {
 type PlayerServer struct {
 	store    PlayerStore
 	template *template.Template
+	game     GameInterface
 	http.Handler
 }
 
 const htmlTemplatePath = "game.html"
 
-func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
+func NewPlayerServer(store PlayerStore, game GameInterface) (*PlayerServer, error) {
 	p := new(PlayerServer)
 
 	tmpl, err := template.ParseFiles("game.html")
@@ -34,11 +34,12 @@ func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 		return nil, fmt.Errorf("problem opening %s %v", htmlTemplatePath, err)
 	}
 
+	p.game = game
 	p.template = tmpl
 	p.store = store
 
 	router := http.NewServeMux()
-	router.Handle("/game", http.HandlerFunc(p.game))
+	router.Handle("/game", http.HandlerFunc(p.playGame))
 	router.Handle("/league", http.HandlerFunc(p.leagueHandler))
 	router.Handle("/players/", http.HandlerFunc(p.playersHandler))
 	router.Handle("/ws", http.HandlerFunc(p.webSocket))
@@ -47,18 +48,19 @@ func NewPlayerServer(store PlayerStore) (*PlayerServer, error) {
 	return p, nil
 }
 
-func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
+func (p *PlayerServer) playGame(w http.ResponseWriter, r *http.Request) {
 	p.template.Execute(w, nil)
 }
 
 func (p *PlayerServer) webSocket(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
-	conn, _ := upgrader.Upgrade(w, r, nil)
-	_, winnerMsg, _ := conn.ReadMessage()
-	p.store.RecordWin(string(winnerMsg))
+	ws := newPlayerServerWS(w, r)
+
+	numberOfPlayersMsg := ws.WaitForMsg()
+	numberOfPlayers, _ := strconv.Atoi(numberOfPlayersMsg)
+	p.game.Start(numberOfPlayers, ws)
+
+	winner := ws.WaitForMsg()
+	p.game.Finish(winner)
 }
 
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
